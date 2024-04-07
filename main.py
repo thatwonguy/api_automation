@@ -73,7 +73,7 @@ def main():
         return df
 
 
-    @flow(retries=3, retry_delay_seconds=600, log_prints=True)
+    @flow(log_prints=True)
     def automate():
         """
         Given the repo source, python script and main flow entry point
@@ -111,6 +111,4 @@ def main():
     # shows the df without the index column
     st.dataframe(df, width=1000, height=600)
 
-
-if __name__ == "__main__":
-    main()
+main()

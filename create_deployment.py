@@ -5,7 +5,7 @@ if __name__ == "__main__":
     flow.from_source(
         # source= the github or repo location where the source is located
         source="https://github.com/thatwonguy/automation.git",
-        # entrpoint = the python script name and function name where the flow is expected to start
+        # entrypoint = the python script name and function name where the flow is expected to start
         entrypoint="main.py:automate",
     ).deploy(
         name="my-first-deployment",
