@@ -57,7 +57,10 @@ def get_data(db,connection):
 df = get_data(db,collection)
 
 # print results for user at end-location
-st.write("""The below dataframe is updated with a timestamp of data being updated 
-        and pulled from a cloud database using Prefect Automation and Orchestration 
-        to demonstrate a no-touch solution is possible. This table is automated.""")
+st.write("""This table is fully automated. 
+            The timestamp data is being updated everytime the code is run.
+            The data is then stored and updated in a datebase.
+            The data is then pulled from the database and presented to the end user.
+            Prefect Automation and Orchestration is used to carry out automation step and 
+            demonstrates that a no-touch solution is possible.""")
 st.write(df)
