@@ -11,104 +11,103 @@ import pandas as pd
 import pytz
 from prefect import flow, task
 
-def main():
-    # Initialize connection.
-    # Uses st.cache_resource to only run once.
-    @st.cache_resource
-    @task
-    def init_connection():
-        uri = st.secrets['mongo']['uri']
-        # Create a new client and connect to the server
-        client = MongoClient(uri, server_api=ServerApi('1'))
-        # Send a ping to confirm a successful connection
-        try:
-            client.admin.command('ping')
-            print("Pinged your deployment. You successfully connected to MongoDB!")
-        except Exception as e:
-            print(e)
-        return client
 
-    # Get the current date and time, this will be the data that we will be working with and can be replaced with any other data
-    @task
-    def date():
-        current_datetime = datetime.now()
-        # format to provide standard time %I and AM or PM %p
-        formatted_datetime = current_datetime.strftime("%m-%d-%Y %I:%M:%S.%f %p")
-        print(current_datetime)
-        print(formatted_datetime)
-        return formatted_datetime
+# Initialize connection.
+# Uses st.cache_resource to only run once.
+@st.cache_resource
+@task
+def init_connection():
+    uri = st.secrets['mongo']['uri']
+    # Create a new client and connect to the server
+    client = MongoClient(uri, server_api=ServerApi('1'))
+    # Send a ping to confirm a successful connection
+    try:
+        client.admin.command('ping')
+        print("Pinged your deployment. You successfully connected to MongoDB!")
+    except Exception as e:
+        print(e)
+    return client
+
+# Get the current date and time, this will be the data that we will be working with and can be replaced with any other data
+@task
+def date():
+    current_datetime = datetime.now()
+    # format to provide standard time %I and AM or PM %p
+    formatted_datetime = current_datetime.strftime("%m-%d-%Y %I:%M:%S.%f %p")
+    print(current_datetime)
+    print(formatted_datetime)
+    return formatted_datetime
+
+# Insert data into MongoDB
+@task
+def insert_data(time, collection):
+    data = {"timestamp": time}
+    collection.insert_one(data)
+
+# obtain the udpated database information for end-user viewing
+# Uses st.cache_data to only rerun when the query changes
+@task
+def get_data(connection, collection):
+    # Retrieve items from MongoDB collection
+    items = collection.find()
+    items = list(items)  # Convert cursor to list for compatibility with st.cache_data
+
+    # Create DataFrame from items
+    df = pd.DataFrame(items)
+
+    # Convert 'timestamp' column to datetime
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+    # Localize datetime to Eastern Standard Time (EST)
+    eastern = pytz.timezone('US/Eastern')
+    df['timestamp'] = df['timestamp'].dt.tz_localize(pytz.utc).dt.tz_convert(eastern)
+
+    # Sort DataFrame by 'timestamp' column in descending order
+    df = df.sort_values(by='timestamp', ascending=False)
+
+    # Convert 'timestamp' column back to string with original format
+    df['timestamp'] = df['timestamp'].dt.strftime('%m-%d-%Y %I:%M:%S.%f %p')
+
+    # delete column not needed
+    del df['_id']
+    return df
+
+
+@flow(log_prints=True)
+def automate():
+    """
+    Given the repo source, python script and main flow entry point
+    create_deployment.py gets called and creates automated run of this script
+    using prefect.
+    """
+    # task 1 to call mongo connection
+    client = init_connection()
     
-    # Insert data into MongoDB
-    @task
-    def insert_data(time, collection):
-        data = {"timestamp": time}
-        collection.insert_one(data)
-    
-    # obtain the udpated database information for end-user viewing
-    # Uses st.cache_data to only rerun when the query changes
-    @task
-    def get_data(connection, collection):
-        # Retrieve items from MongoDB collection
-        items = collection.find()
-        items = list(items)  # Convert cursor to list for compatibility with st.cache_data
+    # global variables, specify db and collection to get and post to
+    db = client["automation"]
+    collection = db["date"]
 
-        # Create DataFrame from items
-        df = pd.DataFrame(items)
+    # task 2 to get date data
+    formatted_datetime = date()
 
-        # Convert 'timestamp' column to datetime
-        df['timestamp'] = pd.to_datetime(df['timestamp'])
+    # task 3 to call function to insert to datetime into datebase
+    insert_data(formatted_datetime, collection)
 
-        # Localize datetime to Eastern Standard Time (EST)
-        eastern = pytz.timezone('US/Eastern')
-        df['timestamp'] = df['timestamp'].dt.tz_localize(pytz.utc).dt.tz_convert(eastern)
+    # task 4 to get the data from database and 
+    df = get_data(client, collection)
+    return df
 
-        # Sort DataFrame by 'timestamp' column in descending order
-        df = df.sort_values(by='timestamp', ascending=False)
+# initiate this flow and all associating tasks for prefect automation and cron scheduling
+df = automate()
 
-        # Convert 'timestamp' column back to string with original format
-        df['timestamp'] = df['timestamp'].dt.strftime('%m-%d-%Y %I:%M:%S.%f %p')
+# print results for user at end-location
+st.write("""This table is fully automated. 
+            The timestamp (localized to US/Eastern time) data is being updated everytime the code is run.
+            The data is then stored and updated in a datebase.
+            The data is then pulled from the database and presented to the end user.
+            Prefect Automation and Orchestration is used to carry out automation step and 
+            demonstrates that a no-touch solution is possible.""")
 
-        # delete column not needed
-        del df['_id']
-        return df
+# shows the df without the index column
+st.dataframe(df, width=1000, height=600)
 
-
-    @flow(log_prints=True)
-    def automate():
-        """
-        Given the repo source, python script and main flow entry point
-        create_deployment.py gets called and creates automated run of this script
-        using prefect.
-        """
-        # task 1 to call mongo connection
-        client = init_connection()
-        
-        # global variables, specify db and collection to get and post to
-        db = client["automation"]
-        collection = db["date"]
-
-        # task 2 to get date data
-        formatted_datetime = date()
-
-        # task 3 to call function to insert to datetime into datebase
-        insert_data(formatted_datetime, collection)
-
-        # task 4 to get the data from database and 
-        df = get_data(client, collection)
-        return df
-
-    # initiate this flow and all associating tasks for prefect automation and cron scheduling
-    df = automate()
-
-    # print results for user at end-location
-    st.write("""This table is fully automated. 
-                The timestamp (localized to US/Eastern time) data is being updated everytime the code is run.
-                The data is then stored and updated in a datebase.
-                The data is then pulled from the database and presented to the end user.
-                Prefect Automation and Orchestration is used to carry out automation step and 
-                demonstrates that a no-touch solution is possible.""")
-
-    # shows the df without the index column
-    st.dataframe(df, width=1000, height=600)
-
-main()
