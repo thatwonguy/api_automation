@@ -69,6 +69,18 @@ def get_data(collection):
     df['timestamp'] = df['timestamp'].dt.strftime('%m-%d-%Y %I:%M:%S.%f %p')
 
     del df['_id']
+
+    # print results for user at end-location
+    st.write("""This table is fully automated. 
+                The timestamp (localized to US/Eastern time) data is being updated everytime the code is run.
+                The data is then stored and updated in a datebase.
+                The data is then pulled from the database and presented to the end user.
+                Prefect Automation and Orchestration is used to carry out automation step and 
+                demonstrates that a no-touch solution is possible.""")
+
+    # shows the df without the index column
+    st.dataframe(df, width=1000, height=1000)
+
     return df
 
 @flow(log_prints=True)
@@ -91,16 +103,5 @@ def automate():
     # task 3 to call function to insert to datetime into datebase
     insert_data(formatted_datetime, collection)
 
-    # task 4 to get the data from database and 
+    # task 4 to get the data from database
     df = get_data(client, collection)
-
-    # print results for user at end-location
-    st.write("""This table is fully automated. 
-                The timestamp (localized to US/Eastern time) data is being updated everytime the code is run.
-                The data is then stored and updated in a datebase.
-                The data is then pulled from the database and presented to the end user.
-                Prefect Automation and Orchestration is used to carry out automation step and 
-                demonstrates that a no-touch solution is possible.""")
-
-    # shows the df without the index column
-    st.dataframe(df, width=1000, height=1000)
