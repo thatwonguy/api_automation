@@ -81,8 +81,6 @@ def get_data(collection):
     # shows the df without the index column
     st.dataframe(df, width=1000, height=1000)
 
-    return df
-
 @flow(log_prints=True)
 def automate():
     """
