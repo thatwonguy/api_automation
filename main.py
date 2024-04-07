@@ -8,6 +8,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 import toml
 import pandas as pd
+import pytz
 
 # Initialize connection.
 # Uses st.cache_resource to only run once.
@@ -56,6 +57,11 @@ def get_data(connection):
     # string object being coverted to datetime and sorted based on date
     df['timestamp'] = pd.to_datetime(df['timestamp'])
 
+    # Localize datetime to Eastern Standard Time (EST)
+    eastern = pytz.timezone('US/Eastern')
+    df['timestamp'] = df['timestamp'].dt.tz_localize(pytz.utc).dt.tz_convert(eastern)
+
+
     # Sort DataFrame by 'timestamp' column in descending order
     df = df.sort_values(by='timestamp', ascending=False)
 
@@ -68,7 +74,7 @@ df = get_data(collection)
 
 # print results for user at end-location
 st.write("""This table is fully automated. 
-            The timestamp data is being updated everytime the code is run.
+            The timestamp (localized to US/Eastern time) data is being updated everytime the code is run.
             The data is then stored and updated in a datebase.
             The data is then pulled from the database and presented to the end user.
             Prefect Automation and Orchestration is used to carry out automation step and 
