@@ -72,7 +72,6 @@ def get_data(connection, collection):
     del df['_id']
     return df
 
-
 @flow(log_prints=True)
 def automate():
     """
@@ -105,9 +104,9 @@ def automate():
                 demonstrates that a no-touch solution is possible.""")
 
     # shows the df without the index column
-    st.dataframe(df, width=1000, height=600)
+    st.dataframe(df, width=1000, height=1000)
 
-    return
+    return df
 
 # initiate this flow and all associating tasks for prefect automation and cron scheduling
 df = automate()
