@@ -105,5 +105,3 @@ def automate():
 
     # shows the df without the index column
     st.dataframe(df, width=1000, height=1000)
-
-    return df
