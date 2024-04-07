@@ -68,9 +68,9 @@ def get_data(collection):
     # print results for user at end-location
     st.write("""This table is fully automated. 
                 The timestamp (localized to US/Eastern time) data is being updated everytime the code is run.
-                The data is then stored and updated in a datebase.
-                The data is then pulled from the database and presented to the end user.
-                Prefect Automation and Orchestration is used to carry out automation step and 
+                The data is stored and updated in a database.
+                The latest update timestamp on the database is presented to the end user here.
+                Prefect Automation and Orchestration is used to carry out the automation using cron scheduling, and 
                 demonstrates that a no-touch solution is possible.""")
 
     # shows the df without the index column
