@@ -81,7 +81,5 @@ st.write("""This table is fully automated.
             Prefect Automation and Orchestration is used to carry out automation step and 
             demonstrates that a no-touch solution is possible.""")
 
-# center the df
-styled_df = df.style.set_properties(**{'text-align': 'center'})
 
-st.dataframe(styled_df, unsafe_allow_html=True, width=1000, height=600, hide_index=True)
+st.dataframe(df, width=1000, height=600, hide_index=True)
