@@ -72,7 +72,8 @@ def main():
         # Convert 'timestamp' column back to string with original format
         df['timestamp'] = df['timestamp'].dt.strftime('%m-%d-%Y %I:%M:%S.%f %p')
 
-        # del df['_id']
+        # delete column not needed
+        del df['_id']
         return df
     df = get_data(collection)
 
