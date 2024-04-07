@@ -9,10 +9,12 @@ from pymongo.server_api import ServerApi
 import toml
 import pandas as pd
 import pytz
+from prefect import flow, task
+
 
 # Initialize connection.
 # Uses st.cache_resource to only run once.
-@st.cache_resource
+# @st.cache_resource
 def init_connection():
     uri = st.secrets['mongo']['uri']
     # Create a new client and connect to the server
@@ -69,7 +71,7 @@ def get_data(connection):
     # Convert 'timestamp' column back to string with original format
     df['timestamp'] = df['timestamp'].dt.strftime('%m-%d-%Y %I:%M:%S.%f %p')
 
-    # del df['_id']
+    del df['_id']
     return df
 df = get_data(collection)
 
