@@ -99,3 +99,4 @@ def automate():
     # Get data from database
     get_data(collection)
 
+automate()
