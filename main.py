@@ -14,7 +14,6 @@ from prefect import flow, task
 
 # Initialize connection.
 # Uses st.cache_resource to only run once.
-@st.cache_resource
 @task
 def init_connection():
     uri = st.secrets['mongo']['uri']
@@ -31,16 +30,16 @@ def init_connection():
 # Get the current date and time, this will be the data that we will be working with and can be replaced with any other data
 @task
 def date():
+    # get current date
     current_datetime = datetime.now()
     # format to provide standard time %I and AM or PM %p
     formatted_datetime = current_datetime.strftime("%m-%d-%Y %I:%M:%S.%f %p")
-    print(current_datetime)
     print(formatted_datetime)
     return formatted_datetime
 
 # Insert data into MongoDB
 @task
-def insert_data(time, collection):
+def insert_date(time, collection):
     data = {"timestamp": time}
     collection.insert_one(data)
 
@@ -81,25 +80,22 @@ def get_data(collection):
     # shows the df without the index column
     st.dataframe(df, width=1000, height=1000)
 
+# entrypoint Prefect flow
 @flow(log_prints=True)
 def automate():
-    """
-    Given the repo source, python script and main flow entry point
-    create_deployment.py gets called and creates automated run of this script
-    using prefect.
-    """
-    # task 1 to call mongo connection
+    # Initialize connection
     client = init_connection()
     
-    # global variables, specify db and collection to get and post to
+    # Global variables, specify db and collection to get and post to
     db = client["automation"]
     collection = db["date"]
 
-    # task 2 to get date data
+    # Get date data
     formatted_datetime = date()
 
-    # task 3 to call function to insert to datetime into datebase
-    insert_data(formatted_datetime, collection)
+    # Insert data into database
+    insert_date(formatted_datetime, collection)
 
-    # task 4 to get the data from database
-    df = get_data(client, collection)
+    # Get data from database
+    get_data(collection)
+

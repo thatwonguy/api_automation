@@ -8,7 +8,7 @@ if __name__ == "__main__":
         entrypoint="main.py:automate",
     ).deploy(
         name="streamlit_automate",
-        work_pool_name="streamlit-managed-pool",
+        work_pool_name="my-managed-pool",
         # this runs everyday at 5pm
         cron="0 17 * * *",
     )
