@@ -11,11 +11,11 @@ import pandas as pd
 import pytz
 from prefect import flow, task
 
-@flow(retries=3, retry_delay_seconds=600, log_prints=True)
 def main():
     # Initialize connection.
     # Uses st.cache_resource to only run once.
     @st.cache_resource
+    @task
     def init_connection():
         uri = st.secrets['mongo']['uri']
         # Create a new client and connect to the server
@@ -27,13 +27,9 @@ def main():
         except Exception as e:
             print(e)
         return client
-    client = init_connection()
-
-    # global variables, specify db and collection to get and post to
-    db = client["automation"]
-    collection = db["date"]
 
     # Get the current date and time, this will be the data that we will be working with and can be replaced with any other data
+    @task
     def date():
         current_datetime = datetime.now()
         # format to provide standard time %I and AM or PM %p
@@ -41,17 +37,17 @@ def main():
         print(current_datetime)
         print(formatted_datetime)
         return formatted_datetime
-    formatted_datetime = date()
-
+    
     # Insert data into MongoDB
-    def insert_data(time):
+    @task
+    def insert_data(time, collection):
         data = {"timestamp": time}
         collection.insert_one(data)
-    insert_data(formatted_datetime)
-
+    
     # obtain the udpated database information for end-user viewing
     # Uses st.cache_data to only rerun when the query changes
-    def get_data(connection):
+    @task
+    def get_data(connection, collection):
         # Retrieve items from MongoDB collection
         items = collection.find()
         items = list(items)  # Convert cursor to list for compatibility with st.cache_data
@@ -75,7 +71,34 @@ def main():
         # delete column not needed
         del df['_id']
         return df
-    df = get_data(collection)
+
+
+    @flow(retries=3, retry_delay_seconds=600, log_prints=True)
+    def automate():
+        """
+        Given the repo source, python script and main flow entry point
+        create_deployment.py gets called and creates automated run of this script
+        using prefect.
+        """
+        # task 1 to call mongo connection
+        client = init_connection()
+        
+        # global variables, specify db and collection to get and post to
+        db = client["automation"]
+        collection = db["date"]
+
+        # task 2 to get date data
+        formatted_datetime = date()
+
+        # task 3 to call function to insert to datetime into datebase
+        insert_data(formatted_datetime, collection)
+
+        # task 4 to get the data from database and 
+        df = get_data(client, collection)
+        return df
+
+    # initiate this flow and all associating tasks for prefect automation and cron scheduling
+    df = automate()
 
     # print results for user at end-location
     st.write("""This table is fully automated. 
