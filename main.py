@@ -14,7 +14,6 @@ from prefect import flow, task
 
 # Initialize connection.
 # Uses st.cache_resource to only run once.
-# @task
 def init_connection():
     uri = st.secrets['mongo']['uri']
     # Create a new client and connect to the server
@@ -28,7 +27,6 @@ def init_connection():
     return client
 
 # Get the current date and time, this will be the data that we will be working with and can be replaced with any other data
-# @task
 def date():
     # get current date
     current_datetime = datetime.now()
@@ -38,14 +36,12 @@ def date():
     return formatted_datetime
 
 # Insert data into MongoDB
-@task
 def insert_date(time, collection):
     data = {"timestamp": time}
     collection.insert_one(data)
 
 # obtain the udpated database information for end-user viewing
 # Uses st.cache_data to only rerun when the query changes
-@task
 def get_data(collection):
     # Retrieve items from MongoDB collection
     items = collection.find()
