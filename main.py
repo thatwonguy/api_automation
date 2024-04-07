@@ -63,4 +63,4 @@ st.write("""This table is fully automated.
             The data is then pulled from the database and presented to the end user.
             Prefect Automation and Orchestration is used to carry out automation step and 
             demonstrates that a no-touch solution is possible.""")
-st.write(df)
+st.dataframe(df)
