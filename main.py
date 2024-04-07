@@ -95,19 +95,32 @@ def automate():
 
     # task 4 to get the data from database and 
     df = get_data(client, collection)
-    return df
+
+    # print results for user at end-location
+    st.write("""This table is fully automated. 
+                The timestamp (localized to US/Eastern time) data is being updated everytime the code is run.
+                The data is then stored and updated in a datebase.
+                The data is then pulled from the database and presented to the end user.
+                Prefect Automation and Orchestration is used to carry out automation step and 
+                demonstrates that a no-touch solution is possible.""")
+
+    # shows the df without the index column
+    st.dataframe(df, width=1000, height=600)
+
+    return
 
 # initiate this flow and all associating tasks for prefect automation and cron scheduling
 df = automate()
 
-# print results for user at end-location
-st.write("""This table is fully automated. 
-            The timestamp (localized to US/Eastern time) data is being updated everytime the code is run.
-            The data is then stored and updated in a datebase.
-            The data is then pulled from the database and presented to the end user.
-            Prefect Automation and Orchestration is used to carry out automation step and 
-            demonstrates that a no-touch solution is possible.""")
-
-# shows the df without the index column
-st.dataframe(df, width=1000, height=600)
-
+if __name__ == "__main__":
+    automate.from_source(
+        # source= the github or repo location where the source is located
+        source="https://github.com/thatwonguy/automation.git",
+        # entrypoint = the python script name and function name where the flow is expected to start
+        entrypoint="main.py:automate",
+    ).deploy(
+        name="streamlit_automate",
+        work_pool_name="streamlit-managed-pool",
+        # this runs everyday at 5pm
+        cron="0 17 * * *",
+    )
