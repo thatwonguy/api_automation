@@ -13,8 +13,7 @@ import pandas as pd
 # Uses st.cache_resource to only run once.
 @st.cache_resource
 def init_connection():
-    secrets = toml.load("secrets.toml")
-    uri = secrets['mongo']['uri']
+    uri = st.secrets['mongo']['uri']
     # Create a new client and connect to the server
     client = MongoClient(uri, server_api=ServerApi('1'))
     # Send a ping to confirm a successful connection
