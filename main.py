@@ -69,7 +69,7 @@ def get_data(connection):
     # Convert 'timestamp' column back to string with original format
     df['timestamp'] = df['timestamp'].dt.strftime('%m-%d-%Y %I:%M:%S.%f %p')
 
-    del df['_id']
+    # del df['_id']
     return df
 df = get_data(collection)
 
@@ -81,5 +81,5 @@ st.write("""This table is fully automated.
             Prefect Automation and Orchestration is used to carry out automation step and 
             demonstrates that a no-touch solution is possible.""")
 
-
+# shows the df without the index column
 st.dataframe(df, width=1000, height=600, hide_index=True)
