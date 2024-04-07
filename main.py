@@ -14,7 +14,7 @@ from prefect import flow, task
 
 # Initialize connection.
 # Uses st.cache_resource to only run once.
-@task
+# @task
 def init_connection():
     uri = st.secrets['mongo']['uri']
     # Create a new client and connect to the server
@@ -28,7 +28,7 @@ def init_connection():
     return client
 
 # Get the current date and time, this will be the data that we will be working with and can be replaced with any other data
-@task
+# @task
 def date():
     # get current date
     current_datetime = datetime.now()
@@ -90,7 +90,7 @@ def automate():
     db = client["automation"]
     collection = db["date"]
 
-    # Get date data
+    # Get new data
     formatted_datetime = date()
 
     # Insert data into database
