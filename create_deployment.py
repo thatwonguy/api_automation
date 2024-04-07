@@ -1,4 +1,5 @@
 from prefect import flow
+import streamlit as st
 
 if __name__ == "__main__":
     flow.from_source(
