@@ -109,7 +109,7 @@ def automate():
     return df
 
 if __name__ == "__main__":
-    automate.from_source(
+    flow.from_source(
         # source= the github or repo location where the source is located
         source="https://github.com/thatwonguy/automation.git",
         # entrypoint = the python script name and function name where the flow is expected to start
