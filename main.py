@@ -47,14 +47,24 @@ insert_data(formatted_datetime)
 
 # obtain the udpated database information for end-user viewing
 # Uses st.cache_data to only rerun when the query changes
-def get_data(db,connection):
+def get_data(connection):
     items = collection.find()
     items = list(items)  # make hashable for st.cache_data
     #create dataframe
     df = pd.DataFrame(items, columns= ['_id', 'timestamp'])
+
+    # string object being coverted to datetime and sorted based on date
+    df['timestamp'] = pd.to_datetime(df['timestamp'])
+
+    # Sort DataFrame by 'timestamp' column in descending order
+    df = df.sort_values(by='timestamp', ascending=False)
+
+    # Convert 'timestamp' column back to string with original format
+    df['timestamp'] = df['timestamp'].dt.strftime('%m-%d-%Y %I:%M:%S.%f %p')
+
     del df['_id']
     return df
-df = get_data(db,collection)
+df = get_data(collection)
 
 # print results for user at end-location
 st.write("""This table is fully automated. 
