@@ -82,4 +82,4 @@ st.write("""This table is fully automated.
             demonstrates that a no-touch solution is possible.""")
 
 # shows the df without the index column
-st.dataframe(df, width=1000, height=600, hide_index=True)
+st.dataframe(df, width=1000, height=600)
