@@ -49,18 +49,19 @@ insert_data(formatted_datetime)
 # obtain the udpated database information for end-user viewing
 # Uses st.cache_data to only rerun when the query changes
 def get_data(connection):
+    # Retrieve items from MongoDB collection
     items = collection.find()
-    items = list(items)  # make hashable for st.cache_data
-    #create dataframe
-    df = pd.DataFrame(items, columns= ['_id', 'timestamp'])
+    items = list(items)  # Convert cursor to list for compatibility with st.cache_data
 
-    # string object being coverted to datetime and sorted based on date
+    # Create DataFrame from items
+    df = pd.DataFrame(items)
+
+    # Convert 'timestamp' column to datetime
     df['timestamp'] = pd.to_datetime(df['timestamp'])
 
     # Localize datetime to Eastern Standard Time (EST)
     eastern = pytz.timezone('US/Eastern')
     df['timestamp'] = df['timestamp'].dt.tz_localize(pytz.utc).dt.tz_convert(eastern)
-
 
     # Sort DataFrame by 'timestamp' column in descending order
     df = df.sort_values(by='timestamp', ascending=False)
