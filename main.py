@@ -108,9 +108,6 @@ def automate():
 
     return df
 
-# initiate this flow and all associating tasks for prefect automation and cron scheduling
-df = automate()
-
 if __name__ == "__main__":
     automate.from_source(
         # source= the github or repo location where the source is located
