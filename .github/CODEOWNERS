@@ -10,5 +10,4 @@
 # *.py @organizationName/TeamName
 
 # Reviewer by specific folders or files
-/speech_summarizer      @thatwonguy
 *.py                    @thatwonguy      
