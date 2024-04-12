@@ -5,3 +5,6 @@ This demo uses mongodb on the cloud and prefect for automation orchestration. Th
 - exploration and usage of mongodb database and streamlit to display results globally
 - exploration and usage of prefect for automation and orchestration
 
+> [!NOTE]
+> Ideally you want to create a virtual environment(venv) for the individual project you are working on and install all the requirements inside the venv after activating it in your terminal to avoid package installation issues with other projects.
+
